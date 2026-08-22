@@ -6,7 +6,7 @@ server:
     mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
     min-response-size: 1024
 
-spring: 
+spring:
   cloud:
     gateway:
 
@@ -59,7 +59,6 @@ spring:
 
 eureka:
   client:
-
     service-url:
       defaultZone: http://${REGISTRY_HOST:localhost}:8761/eureka/
 
@@ -90,6 +89,7 @@ springdoc:
 
   swagger-ui:
     enabled: true
+
     path: /services/swagger-ui.html
 
     config-url: /v3/api-docs/swagger-config
