@@ -18,9 +18,12 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
 
-    properties:
-      spring.json.value.default.type: com.msnotification.event.ClientCreatedEvent
-      spring.json.trusted.packages: com.msnotification.event
+      properties:
+        spring.json.value.default.type: com.msnotification.event.ClientCreatedEvent
+        spring.json.trusted.packages: com.msnotification.event
+
+    listener:
+      missing-topics-fatal: false
 
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
