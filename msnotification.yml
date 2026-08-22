@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: msclient
+
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:3306/msnotification?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=Africa/Douala&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: update
+
+
+server:
+  port: 8003
+
+
+eureka:
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://${REGISTRY_HOST:localhost}:8761/eureka/
+
+  instance:
+    prefer-ip-address: true
+    appname: msclient
+    instanceId: msclient:${spring.application.instance-id:${random.value}}
+    lease-renewal-interval-in-seconds: 5
+    lease-expiration-duration-in-seconds: 10
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
