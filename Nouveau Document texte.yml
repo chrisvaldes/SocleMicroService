@@ -1,0 +1,141 @@
+
+# indique le port http sur lequel l'application spring boot écoute : http://localhost:8000
+server:
+  port: 8000
+  # active la compression http. si le backend envoie beaucoup de données la réponse peut devenir volumineuse
+  # la compression permet de reduire la taille Ex : 10MB pour 2MB
+  # elle permet : moint de bande passante, réponse plus rapides, meilleur performance
+  compression:
+    enabled: true
+    # ici, on indique quels types de contenu peuvent être compressés
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+    # ne pas compresser les réponses dont la taille est inférieur à 1Mo
+    min-response-size: 1024
+
+# nom logique de l'application Spring Boot. il est utilisé par "Eureka, les logs, Spring Cloud, Actuator..."
+spring:
+  application:
+    name: Spring-Gateway
+  cloud:
+    gateway: # c'est ici que commence la configuration de Spring Cloud Gateway. C'est un composant qui gère (Routing, CORS, Filtres, Load balancing, Headers..."
+      default-filters: # supprime les valeurs dupliquées dans certains header http. les headers concernés sont :
+        # Access-Control-Allow-Origin Access-Control-Allow-Credentials. car avec une architecture Gateway + microservices la gateway peut ajouter Access-Control-Allow-Origin
+        # et le micro service aussi, ce qui peut provoquer des problèmes CORS
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials
+      globalcors:
+        # Cela permet notamment au traitement CORS de fonctionner également pour certaines requêtes qui ne correspondent pas
+        # directement à une route gateway
+        add-to-simple-url-handler-mapping: true
+        # Appliquer cette configuration CORS à toutes les URLs
+        corsConfigurations:
+          '[/**]': # signifie /, /clients, /users, /services/msclient/clients...
+            # utilise GATEWAY_URL si elle existe (pour la prod) ou http://localhost:4200 valeur par défaut
+            allowedOrigins:
+              - ${GATEWAY_URL:http://localhost:4200}
+            # les verbes utilisés pendant la requête
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            # Autorise tous les headers HTTP "Authorization, Content-Type, Accept, X-Total-Count"
+            # très utilise si on utilise JWT
+            allowedHeaders:
+              - "*"
+            # Par défaut, le navigateur ne permet pas au JavaScript frontend de lire certains headers
+            # cela permet au frontend de recupérer un element js exple : X-Total-Count: 150
+            exposedHeaders:
+              - X-Total-Count
+            # cela autorise l'utilisation de credentials cross-origin "Cookies, Authorization, sessions"
+            allowCredentials: true
+
+      # discovery.locator : cela active "Discovery Locator" de spring cloud gateway
+      # cela permet au gateway de construire des routes à partir des services découverts via Eureka
+      #donc au lieu de définir manuellement
+      #routes:
+      #  - id: client
+      #    uri: lb://spkycmsclient
+      #    predicates:
+      #      - Path=/clients/**
+      #
+      # on utilise le service de découverte
+      discovery:
+        locator:
+          enabled: true
+          # les noms des services eureka peuvent $être normalisés en minuscules. cela évite les problèmes de casse dans l'url
+          lower-case-service-id: true
+          # ici, on définit la manière dont la gateway reconnait une URL destinée à un service.
+          # prenons msclient, la gateway construit /services/msclient/**
+          # "serviceId" => représente l'identifiant du service découvert par eureka (serviceId = msclient" le pattern devient "/service/msclient/**
+          predicates:
+            - name: Path
+              args:
+                pattern: "'/services/'+serviceId.toLowerCase()+'/**'"
+          # filters.name = RewritePath : c'est le mécanisme qui va modifier l'URL avant de l'envoyer au microservice
+          filters:
+            - name: RewritePath
+              args:
+                # la gateway capture ce qui vient après "/services/msclient/"
+                # avec "(?<remaining>.*)" par exemple :
+                # /services/msclient/clients/10 donne : "remaining = clients/10"
+                regexp: "'/services/' + serviceId.toLowerCase() + '/(?<remaining>.*)'"
+                #ensuite, remaining = clients/10
+                replacement: "'/${remaining}'"
+      #Donc le Gateway peut maintenir un pool avec jusqu'à environ 1000 connexions
+      #selon le comportement effectif du client et les autres paramètres.
+      httpclient:
+        pool:
+          max-connections: 1000
+
+# eureka.client : est ton service Discovery
+# le Gateway n'a donc pas forcément besoin de connaitre directement localhost:8081 ou localhost:8082
+# Eureka lui indique ou se trouvent les services
+eureka:
+  client:
+    service-url:
+      # le serveur Eureka est ici.
+      defaultZone: http://${REGISTRY_HOST:localhost}:8761/eureka/
+    # active le client eureka
+    enabled: true
+    # la Gateway récupère la liste des services enregistrés auprès d'Eureka
+    fetch-registry: true
+    # la Gateway lui-même doit s'enregistrer auprès d'Eureka
+    register-with-eureka: true
+    # Eureka peut utiliser les informations de santé du service pour déterminer si une instance est disponile
+    healthcheck:
+      enabled: true
+    # le client Eureka met à jour ses informations auprès du serveur environ toutes les 10s
+    instance-info-replication-interval-seconds: 10
+    # la Gateway récupère les informations du registre Eureka toutes les 10s
+    # donc si un service apparait ou disparait, la Gateway actualise rapidement sa vision du registre
+    registry-fetch-interval-seconds: 10
+  # eureka.instance : ici, on configure l'instance du gateway elle-meme
+  instance:
+    appname: Spring-Gateway
+    instanceId: Spring-Gateway:${spring.application.instance-id:${random.value}}
+    # la gateway indique régulièrement à Eureka "je suis vivant" toute les 5s
+    lease-renewal-interval-in-seconds: 5
+    # si Eureka ne reçoit plus de renouvellement pendant suffisamment longtemps, l'instance peut être
+    # considérée comme indisponible
+    lease-expiration-duration-in-seconds: 10
+
+
+#documentation de l'api dans swagger
+springdoc:
+  enable-native-support: true
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /services/swagger-ui.html
+    config-url: /v3/api-docs/swagger-config
+    urls:
+      - url: /v3/api-docs
+        name: API Gateway Service
+      - url: /services/spkycmsclient/v3/api-docs
+        name: spkycmsclient
+      - url: /services/spkycmsconfig/v3/api-docs
+        name: spkycmsconfig
+      - url: /services/spkycmsuaa/v3/api-docs
+        name: spkycmsuaa

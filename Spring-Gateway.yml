@@ -1,4 +1,7 @@
 server:
+  application:
+    name: Spring-Gateway
+
   port: 8000
 
   compression:
