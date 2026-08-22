@@ -1,12 +1,25 @@
 spring:
   application:
-    name: msclient
+    name: msnotification
 
   datasource:
     url: jdbc:mysql://${DB_HOST:localhost}:3306/msnotification?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=Africa/Douala&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true
     username: ${DB_USER:root}
     password: ${DB_PASSWORD:}
     driver-class-name: com.mysql.cj.jdbc.Driver
+
+  kafka:
+    bootstrap-servers: localhost:9092
+
+    consumer:
+      group-id: notification-group
+
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+
+      properties:
+        spring.json.trusted.packages: com.msnotification.event
 
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
