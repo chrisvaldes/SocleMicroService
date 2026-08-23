@@ -10,6 +10,7 @@ spring:
 
 
   kafka:
+    # l'application tourne sur le port 9092
     bootstrap-servers: localhost:9092
 
     consumer:
@@ -36,7 +37,6 @@ spring:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
       ddl-auto: update
-
 
 server:
   port: 8004

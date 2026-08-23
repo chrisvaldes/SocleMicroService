@@ -14,14 +14,25 @@ spring:
       ddl-auto: update
 
   kafka:
+    # l'application tourne sur le port 9092
     bootstrap-servers: localhost:9092
 
     producer:
+      # il faut savoir que les messages dans kafka sont des chaines de caractère,
+      # donc il faut pouvoir sérialiser nos objet pour les transportés sur KAFKA
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
     properties:
+      # Ici, on précise de ne pas mettre les types dans le headers
       spring.json.add.type.headers: false
+      # acknowledge à all pour une durée maximal
+      acks: all
+      retries: 3
+
+kafka:
+  topics:
+    clients: client-topic
 
 server:
   port: 8003
