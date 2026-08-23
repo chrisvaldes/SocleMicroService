@@ -60,8 +60,8 @@ eureka:
 
   instance:
     prefer-ip-address: true
-    appname: msclient
-    instanceId: msclient:${spring.application.instance-id:${random.value}}
+    appname: msnotification
+    instanceId: msnotification:${spring.application.instance-id:${random.value}}
     lease-renewal-interval-in-seconds: 5
     lease-expiration-duration-in-seconds: 10
 
