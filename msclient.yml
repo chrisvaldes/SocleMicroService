@@ -21,7 +21,7 @@ spring:
       # il faut savoir que les messages dans kafka sont des chaines de caractère,
       # donc il faut pouvoir sérialiser nos objet pour les transportés sur KAFKA
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JacksonJsonSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
     properties:
       # Ici, on précise de ne pas mettre les types dans le headers
