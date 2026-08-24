@@ -25,7 +25,7 @@ spring:
 
     properties:
       # Ici, on précise de ne pas mettre les types dans le headers
-      spring.json.add.type.headers: false
+      spring.json.add.type.headers: true
       # acknowledge à all pour une durée maximal
       acks: all
       retries: 3
