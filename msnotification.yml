@@ -10,26 +10,47 @@ spring:
 
 
   kafka:
-    # l'application tourne sur le port 9092
-    bootstrap-servers: localhost:9092
+    # pour commencer à communiquer avec Kafka, va contacter le boker qui se trouve à localhost:9092.
+    bootstrap-servers: localhost:9092 # localhost : serveur -> 9092 : port -> le broker est le serveur Kafka (client-topic, autres topics)
+    # dans un vrai environnement, on peux avoir plusieurs brokers
+    #bootstrap-servers: localhost:9092, localhost:9093,localhost:9094...
 
-    consumer:
-      group-id: notification-group
+    consumer: # son rôle est de lire des messages dans Kafka ( kafka -> bytes/JSON -> JsonDeserializer -> Objet Java
+      group-id: notification-group # identifie le consumer group auquel appartient le consumer
+      #Kafka numérote les messages dans une partition. le consumer doit savoir
+      # A partir de quel message dois-je commencer à lire?
+      # "earliest" : si le consumer group n'a encore aucun offset enregistré, commence depuis le plus ancien message disponible.
+      # "lastest" : lui lira le nouveau messages qui arrivent après son démarrage.
+      # cela ne veut par dire que "earliest" relit systématiquement tous à chaque redémarrage. kafka conserve les offset du consumer group
       auto-offset-reset: earliest
-
+      # Kafka stocke les données sous forme de bytes (binaire). le consumer doit donc transformer les bytes en objet Java
+      # bytes -> String
+      # un message kafka contient deux grandes parties ( la clé une String, sa valeur l'objet evenement)
+      # mais kafka reçoit la valeur sous forme de JSON/bytes on doit donc faire : bytes -> JSON -> ClientCreatedEvent/ClientUpdatedEvent
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-
+      # c'est une couche de sécurité. cela signifie consumer -> ErrorHandlingDeserializer->JsonDeserializer->ClientCreatedEvent
+      # ErrorHandlingDeserializer délègue réellement la désérialisation au JsonDeserializer
+      # il permet de gérer proprement les erreurs de désérialisation. c'est particulièrement utile parce que si kafka reçoit un JSON incompatible
+      # avec un objet Java, on peux avoir une erreur du genre "DeserializationException"
       value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
 
       properties:
+        # ici on dit : "Le vrai désérialiseur utilisé par ErrorHandlingDeserializer sera JsonDeserializer"
+        # ErrorHandlingDeserializer->délègue->JsonDeserializer
         spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
-        spring.json.value.default.type: com.msnotification.event.ClientCreatedEvent
+        # on dit : quand tu reçois la valeur JSON considère comme un ClientCreatedEvent. JSON -> JsonDeserializer -> ClientCreatedEvent
+        # spring.json.value.default.type: com.msnotification.event.ClientCreatedEvent
+        # c'est une mesure de sécurite. on dit : J'autorise les classes provenant de ce package à être désérialisées.
         spring.json.trusted.packages: com.msnotification.event
 
-    producer:
+    # le microservice est également capable de produire des messages Kafka
+    producer: # objet java -> JsonSerializer -> JSON/bytes -> Kafka
+      # mes clés Kafka sont des string
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      # la valeur de mes messages est un objet Java que je veux transformer en JSON
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
+    # Si le topic n'existe pas au démarrage, ne cconsidère pas automatiquement cela comme une erreur fatale
     listener:
       missing-topics-fatal: false
 
