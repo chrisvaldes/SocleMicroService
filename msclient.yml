@@ -14,7 +14,7 @@ spring:
       ddl-auto: update
 
   kafka:
-    # l'application tourne sur le port 9092 notre serveur/cluster
+    #  Adresse du broker Kafka auquel l'application se connecte
     bootstrap-servers: localhost:9092
 
     producer:
