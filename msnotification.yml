@@ -35,13 +35,18 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
 
       properties:
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+
+        spring.json.type.mapping: clientCreated:com.msnotification.event.ClientCreatedEvent
+
+        spring.json.trusted.packages: com.msnotification.event
         # ici on dit : "Le vrai désérialiseur utilisé par ErrorHandlingDeserializer sera JsonDeserializer"
         # ErrorHandlingDeserializer->délègue->JsonDeserializer
-        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+        #spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
         # on dit : quand tu reçois la valeur JSON considère comme un ClientCreatedEvent. JSON -> JsonDeserializer -> ClientCreatedEvent
         # spring.json.value.default.type: com.msnotification.event.ClientCreatedEvent
         # c'est une mesure de sécurite. on dit : J'autorise les classes provenant de ce package à être désérialisées.
-        spring.json.trusted.packages: com.msclient.event.ClientCreatedEvent
+        #spring.json.trusted.packages: com.msclient.event.ClientCreatedEvent
 
     # le microservice est également capable de produire des messages Kafka
     producer: # objet java -> JsonSerializer -> JSON/bytes -> Kafka

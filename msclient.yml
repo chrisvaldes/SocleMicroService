@@ -22,6 +22,9 @@ spring:
       # donc il faut pouvoir sérialiser nos objet pour les transportés sur KAFKA
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: true
+        spring.json.type.mapping: clientCreated:com.msclient.event.ClientCreatedEvent
 
     properties:
       # Ici, on précise de ne pas mettre les types dans le headers
