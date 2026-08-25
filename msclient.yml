@@ -26,7 +26,7 @@ spring:
         # Ici, on précise de mettre les types dans le headers (il s'agit du type d'evenement
         # exple : __TypeId__ = com.msclient.event.ClientCreatedEvent
         spring.json.add.type.headers: true
-        spring.json.type.mapping: clientCreated:com.msclient.event.ClientCreatedEvent
+        #spring.json.type.mapping: clientCreated:com.msclient.event.ClientCreatedEvent
         acks: all
         retries: 3
 
