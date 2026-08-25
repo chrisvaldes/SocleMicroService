@@ -23,13 +23,14 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       properties:
-        # Ici, on précise de ne pas mettre les types dans le headers
-        spring.json.add.type.headers: true
-        spring.json.type.mapping: clientCreated:com.msclient.event.ClientCreatedEvent
+        # Ici, on précise de mettre les types dans le headers (il s'agit du type d'evenement
+        # exple : __TypeId__ = com.msclient.event.ClientCreatedEvent
+        #spring.json.add.type.headers: true
+        #spring.json.type.mapping: clientCreated:com.msclient.event.ClientCreatedEvent
         acks: all
         retries: 3
 
- 
+
 
 kafka:
   topics:
