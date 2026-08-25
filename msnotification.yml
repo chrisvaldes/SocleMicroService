@@ -11,7 +11,7 @@ spring:
 
   kafka:
     # Adresse du broker Kafka auquel l'application se connecte (microservice)
-    bootstrap-servers: localhost:9092 # localhost : serveur -> 9092 : port -> le broker est le serveur Kafka (client-topic, autres topics)
+    bootstrap-servers: localhost:9094 # localhost : serveur -> 9092 : port -> le broker est le serveur Kafka (client-topic, autres topics)
     # dans un vrai environnement, on peux avoir plusieurs brokers
     #bootstrap-servers: localhost:9092, localhost:9093,localhost:9094...
 

@@ -15,7 +15,7 @@ spring:
 
   kafka:
     #  Adresse du broker Kafka auquel l'application se connecte (microservice)
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: localhost:9094
 
     producer:
       # il faut savoir que les messages dans kafka sont des chaines de caractère,
